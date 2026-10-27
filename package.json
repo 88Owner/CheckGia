@@ -1,0 +1,11 @@
+{
+  "name": "shopee-price-checker",
+  "private": true,
+  "description": "Đối chiếu giá Shopee Seller Center với Master Data trên máy local.",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix extension",
+    "dev:backend": "npm run dev --prefix backend",
+    "build:extension": "npm run build --prefix extension",
+    "test": "npm test --prefix backend && npm test --prefix extension"
+  }
+}

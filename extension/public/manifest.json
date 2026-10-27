@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Shopee Price Checker",
+  "version": "1.0.0",
+  "description": "Đối chiếu giá sản phẩm trên trang Quản lý sản phẩm Shopee Seller Center với Master Data local. Chỉ đọc DOM tab hiện tại.",
+  "action": {
+    "default_title": "Shopee Price Checker",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://shopee.vn/*",
+        "https://shopee.com/*",
+        "https://*.shopee.vn/*",
+        "https://*.shopee.com/*"
+      ],
+      "js": ["page-hook.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://banhang.shopee.vn/*",
+        "https://banhang.shopee.com/*",
+        "https://shopee.vn/*",
+        "https://shopee.com/*",
+        "https://*.shopee.vn/*",
+        "https://*.shopee.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": [
+    "https://banhang.shopee.vn/*",
+    "https://banhang.shopee.com/*",
+    "https://shopee.vn/*",
+    "https://shopee.com/*",
+    "https://*.shopee.vn/*",
+    "https://*.shopee.com/*",
+    "http://127.0.0.1:8787/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}

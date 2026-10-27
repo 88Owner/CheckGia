@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: auditor
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-auditor}
+      POSTGRES_DB: price_auditor
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auditor -d price_auditor"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      HOST: 0.0.0.0
+      PORT: "8787"
+      DATABASE_URL: postgres://auditor:${POSTGRES_PASSWORD:-auditor}@postgres:5432/price_auditor
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-this-secret}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Admin}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://127.0.0.1:8388,http://192.168.1.100:8388,http://192.168.1.100:8787}
+      EXTENSION_ID: ${EXTENSION_ID:-}
+      MAX_ITEMS: ${MAX_ITEMS:-100}
+      MIN_DELAY_MS: ${MIN_DELAY_MS:-3000}
+      MAX_DELAY_MS: ${MAX_DELAY_MS:-7000}
+      MAX_CONCURRENT_SCANS: ${MAX_CONCURRENT_SCANS:-10}
+      BACKUP_DIR: /app/backend/backups
+      SQLITE_IMPORT_PATH: /app/backend/data/checker.db
+    ports:
+      - "0.0.0.0:8787:8787"
+    volumes:
+      - backups:/app/backend/backups
+      - ./backend/data:/app/backend/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "0.0.0.0:${WEB_PORT:-8388}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  backups:
